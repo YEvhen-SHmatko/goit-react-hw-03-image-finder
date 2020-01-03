@@ -25,7 +25,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
-  "homepage": "https://yevhen-shmatko.github.io/goit-react-hw-02-phonebook",
+  "homepage": "https://yevhen-shmatko.github.io/goit-react-hw-03-image-finder",
   "eslintConfig": {
     "extends": "react-app"
   },
