@@ -46,7 +46,7 @@ export default class App extends Component {
   };
 
   handleSearchOnSubmit = text => {
-    this.setState({ searchValue: text, images: [], page: 1 });
+    this.setState({ searchValue: text, images: [], page: 1, height: 0 });
   };
 
   handleClickOnMore = () => {
