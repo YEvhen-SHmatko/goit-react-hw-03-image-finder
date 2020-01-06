@@ -1,15 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
 import Styles from './Modal.module.css';
 
 export default class Modal extends Component {
+  overlayRef = createRef();
+
   static propTypes = {
-    status: PropTypes.bool.isRequired,
+    children: PropTypes.node.isRequired,
     closeModal: PropTypes.func.isRequired,
-    element: PropTypes.shape({
-      url: PropTypes.string.isRequired,
-      alt: PropTypes.string.isRequired,
-    }).isRequired,
   };
 
   componentDidMount() {
@@ -27,28 +25,24 @@ export default class Modal extends Component {
   };
 
   handleBackdropClick = e => {
-    if (e.target === e.currentTarget) {
+    const { current } = this.overlayRef;
+    if (e.target === current) {
       this.props.closeModal();
     }
   };
 
   render() {
-    const { element, status } = this.props;
+    const { children } = this.props;
     return (
       <>
-        {status && (
-          <>
-            <div
-              className={Styles.Overlay}
-              onClick={this.handleBackdropClick}
-              role="presentation"
-            >
-              <div className={Styles.Modal}>
-                <img src={element.url} alt={element.alt} />
-              </div>
-            </div>
-          </>
-        )}
+        <div
+          className={Styles.Overlay}
+          ref={this.overlayRef}
+          onClick={this.handleBackdropClick}
+          role="presentation"
+        >
+          <div className={Styles.Modal}>{children}</div>
+        </div>
       </>
     );
   }

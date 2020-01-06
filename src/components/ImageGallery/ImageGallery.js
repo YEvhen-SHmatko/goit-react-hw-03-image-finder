@@ -9,13 +9,7 @@ const ImageGallery = ({ data, openModal }) => {
       {data.length > 0 && (
         <ul className={Styles.ImageGallery}>
           {data.map(item => (
-            <ImageGalleryItem
-              onClick={openModal}
-              key={item.id}
-              imageURL={item.imageURL}
-              alt={item.tags}
-              largeImageURL={item.largeImageURL}
-            />
+            <ImageGalleryItem data={item} onClick={openModal} key={item.id} />
           ))}
         </ul>
       )}
@@ -23,7 +17,11 @@ const ImageGallery = ({ data, openModal }) => {
   );
 };
 ImageGallery.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.any).isRequired,
+  data: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number,
+    }).isRequired,
+  ).isRequired,
   openModal: PropTypes.func.isRequired,
 };
 export default ImageGallery;

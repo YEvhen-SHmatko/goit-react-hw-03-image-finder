@@ -5,6 +5,7 @@ import Button from '../Button/Button';
 import * as API from '../../services/api';
 import Modal from '../Modal/Modal';
 import Loader from '../Loader/Loader';
+import Error from '../Error/Error';
 
 export default class App extends Component {
   state = {
@@ -12,9 +13,9 @@ export default class App extends Component {
     searchValue: '',
     page: 1,
     isLoading: false,
-    height: 0,
     isModal: false,
-    imgIsModal: { url: '', alt: '' },
+    imageId: null,
+    error: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -25,7 +26,12 @@ export default class App extends Component {
   }
 
   getDataApi = (text, page) => {
-    const { height } = this.state;
+    let scrollHeight = 0;
+    if (page === 1) {
+      scrollHeight = 0;
+    } else {
+      scrollHeight = document.documentElement.scrollHeight - 144;
+    }
     this.setState({ isLoading: true });
     API.get(text, page)
       .then(({ data }) => {
@@ -37,63 +43,69 @@ export default class App extends Component {
         throw new Error(error);
       })
       .finally(() => {
+        const { images } = this.state;
+        if (images.length < 1) {
+          this.setState({ error: true });
+        } else {
+          this.setState({ error: false });
+        }
         this.setState({ isLoading: false });
         window.scrollTo({
-          top: height - 142,
+          top: scrollHeight,
           behavior: 'smooth',
         });
       });
   };
 
   handleSearchOnSubmit = text => {
-    this.setState({ searchValue: text, images: [], page: 1, height: 0 });
+    this.setState({ searchValue: text, images: [], page: 1 });
   };
 
   handleClickOnMore = () => {
     const { page } = this.state;
-    const { scrollHeight } = document.documentElement;
     this.setState({
       page: page + 1,
-      height: scrollHeight,
     });
   };
 
-  handleClickIsOpenModal = e => {
-    const url = e.target.attributes.data.value;
-    const alt = e.target.attributes.alt.value;
+  handleClickIsOpenModal = id => {
     this.setState({
-      imgIsModal: { url, alt },
       isModal: true,
+      imageId: id,
     });
   };
 
   handleClickIsCloseModal = e => {
     this.setState({
-      imgIsModal: { url: '', alt: '' },
       isModal: false,
     });
   };
 
   render() {
-    const { images, isLoading, imgIsModal, isModal } = this.state;
+    const { images, isLoading, isModal, imageId, error } = this.state;
     const mapper = massive => {
       return massive.map(e => ({
         imageURL: e.webformatURL,
         ...e,
       }));
     };
+    const fined = (massive, id) => {
+      return massive.find(e => e.id === id);
+    };
+    const imgModal = fined(images, imageId);
     return (
       <>
-        <Modal
-          status={isModal}
-          element={imgIsModal}
-          closeModal={this.handleClickIsCloseModal}
-        />
+        {isModal && (
+          <Modal closeModal={this.handleClickIsCloseModal}>
+            <img src={imgModal.largeImageURL} alt={imgModal.tags} />
+          </Modal>
+        )}
         <Searchbar onSubmit={this.handleSearchOnSubmit} />
         <ImageGallery
           data={mapper(images)}
           openModal={this.handleClickIsOpenModal}
         />
+        {error && <Error>Image not found!</Error>}
         {isLoading && <Loader />}
         {images.length > 0 && <Button onClick={this.handleClickOnMore} />}
       </>
